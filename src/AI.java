@@ -11,20 +11,20 @@ public class AI {
     }
 
     public int getMove(Board board) {
-        return minimax(board, -1000000, 1000000, -1, true, 10)[0];
+        return minimax(board, -1000000, 1000000, true, 12, 0)[0];
     }
 
-    private int[] minimax(Board board, int alpha, int beta, int lastMove, boolean maximizing, int depth) {
-        int won = board.checkWin(lastMove);
+    private int[] minimax(Board board, int alpha, int beta, boolean maximizing, int depth, int turns) {
+        int won = board.checkWin();
         if (won != 0) {
-            if (won == 1) {
-                return new int[] {-1, -100000000};
+            if (won == player) {
+                return new int[] {-1, (22 - turns)};
             } else {
-                return new int[] {-1, 100000000};
+                return new int[] {-1, -(22 - turns)};
             }
         }
         if (depth == 0) {
-            return new int[] {-1, getScore(board)};
+            return new int[] {-1, 0};
         }
         int ret = 0;
         if (maximizing) {
@@ -33,7 +33,7 @@ public class AI {
                 int move = checkOrder[i];
                 Board newBoard = (Board)board.clone();
                 if (newBoard.addTile(move)) {
-                    int[] res = minimax(newBoard, alpha, beta, move, !maximizing, depth - 1);
+                    int[] res = minimax(newBoard, alpha, beta, !maximizing, depth - 1, turns + 1);
                     if (res[1] > retScore) {
                         ret = move;
                         retScore = res[1];
@@ -51,7 +51,7 @@ public class AI {
                 int move = checkOrder[i];
                 Board newBoard = (Board)board.clone();
                 if (newBoard.addTile(move)) {
-                    int[] res = minimax(newBoard, alpha, beta, move, !maximizing, depth - 1);
+                    int[] res = minimax(newBoard, alpha, beta, !maximizing, depth - 1, turns);
                     if (res[1] < retScore) {
                         ret = move;
                         retScore = res[1];
@@ -64,49 +64,5 @@ public class AI {
             }
             return new int[] {ret, retScore};
         }
-    }
-
-    private int getScore(Board board) {
-        int ret = 0;
-        for (int col = 0; col < board.BOARD_WIDTH; col++) {
-            for (int row = 0; row < board.BOARD_HEIGHT; row++) {
-                if (board.get(col, row) == 0) {
-                    continue;
-                }
-                for (int k = 0; k < 8; k++) {
-                    int len = 0;
-                    boolean free = true;
-                    for (int d = 0; d < 4; d++) {
-                        int nx = col + d * dx[k];
-                        int ny = row + d * dy[k];
-                        if (board.isOOB(nx, ny)) {
-                            break;
-                        }
-                        if (board.get(nx, ny) == board.get(col, row)) {
-                            len += 1;
-                        } else if (board.get(nx, ny) == -board.get(col, row)) {
-                            free = false;
-                            break;
-                        }
-                    }
-                    if (free) {
-                        if (board.get(col, row) == player) {
-                            if (len == 2) {
-                                ret += 2;
-                            } else if (len == 3) {
-                                ret += 5;
-                            } else if (len == 4) {
-                                ret += 1000;
-                            }
-                        } else {
-                            if (len == 3) {
-                                ret -= 4;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return ret;
     }
 }

@@ -22,9 +22,9 @@ public class Game {
         Board board = new Board();
         System.out.println("Player first? (y/N)");
         String first = sc.nextLine();
-        AI ai = new AI(-1);
         while (true) {
             if (first.equals("y")) {
+                AI ai = new AI(-1);
                 if (playerMove(board, sc, "Player")) {
                     break;
                 }
@@ -32,6 +32,7 @@ public class Game {
                     break;
                 }
             } else {
+                AI ai = new AI(1);
                 if (aiMove(board, ai)) {
                     break;
                 }
@@ -51,7 +52,7 @@ public class Game {
             System.out.println("Invalid move.");
             column = Integer.parseInt(sc.nextLine());
         }
-        if (board.checkWin(column) != 0) {
+        if (board.checkWin() != 0) {
             board.printBoard();
             System.out.println(playerName + " wins.");
             return true;
@@ -62,7 +63,7 @@ public class Game {
     private static boolean aiMove(Board board, AI ai) {
         int aiMove = ai.getMove(board);
         board.addTile(aiMove);
-        if (board.checkWin(aiMove) != 0) {
+        if (board.checkWin() != 0) {
             board.printBoard();
             System.out.println("Computer wins.");
             return true;
