@@ -1,20 +1,24 @@
+import java.util.HashMap;
+import java.util.Map;
+
 public class AI {
-
-    int[] dx = {1, 1, 1, 0, 0, -1, -1 ,-1};
-    int[] dy = {1, 0, -1, 1, -1, 1, 0, -1};
-    int[] checkOrder = {3, 4, 2, 5, 1, 6, 0};
-
     int player;
+    Map<Long, Integer> lookup;
 
     public AI(int player) {
         this.player = player;
+        this.lookup = new HashMap<>();
     }
 
     public int getMove(Board board) {
-        return minimax(board, -1000000, 1000000, true, 12, 0)[0];
+        return minimax(board, -1000000, 1000000, 16, 0)[0];
     }
 
-    private int[] minimax(Board board, int alpha, int beta, boolean maximizing, int depth, int turns) {
+    private int[] minimax(Board board, int alpha, int beta, int depth, int turns) {
+        if (lookup.containsKey(board.getHash())) {
+            int res = lookup.get(board.getHash());
+            return decode(res);
+        }
         int won = board.checkWin();
         if (won != 0) {
             if (won == player) {
@@ -27,13 +31,18 @@ public class AI {
             return new int[] {-1, 0};
         }
         int ret = 0;
-        if (maximizing) {
-            int retScore = -1000;
-            for (int i = 0 ; i < board.BOARD_WIDTH; i++) {
-                int move = checkOrder[i];
+        int retScore;
+        if (depth % 2 == 0) {
+            retScore = -1000;
+            for (int i = 0; i < board.BOARD_WIDTH; i++) {
+                int move = calcMove(i, board);
                 Board newBoard = (Board)board.clone();
                 if (newBoard.addTile(move)) {
-                    int[] res = minimax(newBoard, alpha, beta, !maximizing, depth - 1, turns + 1);
+                    int[] res = minimax(newBoard, alpha, beta, depth - 1, turns + 1);
+                    if (res[1] > 0) {
+                        lookup.put(board.getHash(), encode(ret, retScore));
+                        return new int[] {ret, retScore};
+                    }
                     if (res[1] > retScore) {
                         ret = move;
                         retScore = res[1];
@@ -44,14 +53,13 @@ public class AI {
                     }
                 }
             }
-            return new int[] {ret, retScore};
         } else {
-            int retScore = 1000;
+            retScore = 1000;
             for (int i = 0 ; i < board.BOARD_WIDTH; i++) {
-                int move = checkOrder[i];
+                int move = calcMove(i, board);
                 Board newBoard = (Board)board.clone();
                 if (newBoard.addTile(move)) {
-                    int[] res = minimax(newBoard, alpha, beta, !maximizing, depth - 1, turns);
+                    int[] res = minimax(newBoard, alpha, beta, depth - 1, turns);
                     if (res[1] < retScore) {
                         ret = move;
                         retScore = res[1];
@@ -62,7 +70,32 @@ public class AI {
                     }
                 }
             }
-            return new int[] {ret, retScore};
+        }
+        lookup.put(board.getHash(), encode(ret, retScore));
+        return new int[] {ret, retScore};
+    }
+
+    private int encode(int ret, int retScore) {
+        if (retScore < 0) {
+            return -(1000 * ret + -1 * retScore);
+        } else {
+            return 1000 * ret + retScore;
+        }
+    }
+
+    private int[] decode(int hash) {
+        if (hash < 0) {
+            return new int[] {-hash / 1000, -(-hash % 1000)};
+        } else {
+            return new int[] {hash / 1000, hash % 1000};
+        }
+    }
+
+    private int calcMove(int i, Board board) {
+        if (i % 2 == 0) {
+            return board.BOARD_WIDTH / 2 + i / 2;
+        } else {
+            return board.BOARD_WIDTH / 2 - (i + 1) / 2;
         }
     }
 }

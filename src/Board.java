@@ -1,50 +1,37 @@
-import java.util.BitSet;
-
 public class Board implements Cloneable {
-    final int BOARD_WIDTH = 7;
-    final int BOARD_HEIGHT = 6;
-
-    int[] dx = {1, 1, 1, 0};
-    int[] dy = {1, -1, 0, 1};
+    final static int BOARD_WIDTH = 7;
+    final static int BOARD_HEIGHT = 6;
 
     long player;
     long mask;
     int turn;
-    int[] height;
 
     public Board() {
         player = 0;
         mask = 0;
         turn = 1;
-        height = new int[BOARD_WIDTH];
     }
 
-    public Board(long player, long mask, int turn, int[] height) {
+    public Board(long player, long mask, int turn) {
         this.player = player;
         this.mask = mask;
         this.turn = turn;
-        this.height = height;
     }
-
-    public int getTurn() {
-        return turn;
-    }
-
-//    public int get(int col, int row) {
-//        return board[col][row];
-//    }
 
     public boolean addTile(int column) {
-        if (height[column] == BOARD_HEIGHT) {
+        long move = 1L << (column * 7);
+        if (((mask + move) & (1L << ((column + 1) * 7 - 1))) != 0) {
             return false;
         }
 
-        long l = (1L << (7 * column + height[column]));
-        mask = mask | l;
         if (turn == 1) {
-            player = player | l;
+            long otherPlayer = mask ^ player;
+            mask = mask | (mask + move);
+            player = mask ^ otherPlayer;
+        } else {
+            mask = mask | (mask + move);
         }
-        height[column]++;
+
         turn = -turn;
         return true;
     }
@@ -132,11 +119,11 @@ public class Board implements Cloneable {
         }
     }
 
-    public boolean isOOB(int x, int y) {
-        return x < 0 || x >= BOARD_WIDTH || y < 0 || y >= BOARD_HEIGHT;
+    public Object clone() {
+        return new Board(player, mask, turn);
     }
 
-    public Object clone() {
-        return new Board(player, mask, turn, height.clone());
+    public long getHash() {
+        return player + mask;
     }
 }

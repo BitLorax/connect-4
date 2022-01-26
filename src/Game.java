@@ -3,10 +3,23 @@ import java.util.Scanner;
 public class Game {
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
-        pVc(sc);
+        System.out.println("1. Player vs Computer");
+        System.out.println("2. Player vs Player");
+        System.out.print("Select mode: ");
+        String mode = sc.nextLine();
+        while (!mode.equals("1") && !mode.equals("2")) {
+            System.out.println("Invalid mode.");
+        }
+        System.out.println();
+
+        if (mode.equals("1")) {
+            pvc(sc);
+        } else {
+            pvp(sc);
+        }
     }
 
-    private static void pVp(Scanner sc) {
+    private static void pvp(Scanner sc) {
         Board board = new Board();
         while (true) {
             if (playerMove(board, sc, "Player 1 (X)")) {
@@ -18,25 +31,29 @@ public class Game {
         }
     }
 
-    private static void pVc(Scanner sc) {
+    private static void pvc(Scanner sc) {
         Board board = new Board();
-        System.out.println("Player first? (y/N)");
+        System.out.print("Player moves first? (y/N) ");
         String first = sc.nextLine();
+        AI ai;
+        if (first.equals("y")) {
+            ai = new AI(-1);
+        } else {
+            ai = new AI(1);
+        }
         while (true) {
             if (first.equals("y")) {
-                AI ai = new AI(-1);
-                if (playerMove(board, sc, "Player")) {
+                if (playerMove(board, sc, "Player (X)")) {
                     break;
                 }
                 if (aiMove(board, ai)) {
                     break;
                 }
             } else {
-                AI ai = new AI(1);
                 if (aiMove(board, ai)) {
                     break;
                 }
-                if (playerMove(board, sc, "Player")) {
+                if (playerMove(board, sc, "Player (O)")) {
                     break;
                 }
             }
@@ -47,10 +64,11 @@ public class Game {
         System.out.println();
         board.printBoard();
         System.out.println(playerName + "'s move. ");
-        int column = Integer.parseInt(sc.nextLine());
-        while (!board.addTile(column)) {
+
+        int column = getPlayerMove(sc);
+        while (column < 0 || column >= board.BOARD_WIDTH || !board.addTile(column)) {
             System.out.println("Invalid move.");
-            column = Integer.parseInt(sc.nextLine());
+            column = getPlayerMove(sc);
         }
         if (board.checkWin() != 0) {
             board.printBoard();
@@ -60,7 +78,26 @@ public class Game {
         return false;
     }
 
+    private static int getPlayerMove(Scanner sc) {
+        String inp = sc.nextLine();
+        int column;
+        while (true) {
+            try {
+                column = Integer.parseInt(inp);
+                return column;
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input.");
+                inp = sc.nextLine();
+            }
+        }
+
+    }
+
     private static boolean aiMove(Board board, AI ai) {
+        System.out.println();
+        board.printBoard();
+        System.out.println("Computer's move...");
+
         int aiMove = ai.getMove(board);
         board.addTile(aiMove);
         if (board.checkWin() != 0) {
