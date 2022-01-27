@@ -39,10 +39,10 @@ public class AI {
                 Board newBoard = (Board)board.clone();
                 if (newBoard.addTile(move)) {
                     int[] res = minimax(newBoard, alpha, beta, depth - 1, turns + 1);
-                    if (res[1] > 0) {
-                        lookup.put(board.getHash(), encode(ret, retScore));
-                        return new int[] {ret, retScore};
-                    }
+//                    if (res[1] > 0) {
+//                        lookup.put(board.getHash(), encode(ret, retScore));
+//                        return new int[] {ret, retScore};
+//                    }
                     if (res[1] > retScore) {
                         ret = move;
                         retScore = res[1];
