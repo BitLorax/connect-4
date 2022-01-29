@@ -66,7 +66,7 @@ public class Game {
         System.out.println(playerName + "'s move. ");
 
         int column = getPlayerMove(sc);
-        while (column < 0 || column >= board.BOARD_WIDTH || !board.addTile(column)) {
+        while (column < 0 || column >= Board.BOARD_WIDTH || !board.addTile(column)) {
             System.out.println("Invalid move.");
             column = getPlayerMove(sc);
         }

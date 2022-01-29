@@ -34,8 +34,8 @@ public class AI {
         int retScore;
         if (depth % 2 == 0) {
             retScore = -1000;
-            for (int i = 0; i < board.BOARD_WIDTH; i++) {
-                int move = calcMove(i, board);
+            for (int i = 0; i < Board.BOARD_WIDTH; i++) {
+                int move = calcMove(i);
                 Board newBoard = (Board)board.clone();
                 if (newBoard.addTile(move)) {
                     int[] res = minimax(newBoard, alpha, beta, depth - 1, turns + 1);
@@ -55,8 +55,8 @@ public class AI {
             }
         } else {
             retScore = 1000;
-            for (int i = 0 ; i < board.BOARD_WIDTH; i++) {
-                int move = calcMove(i, board);
+            for (int i = 0 ; i < Board.BOARD_WIDTH; i++) {
+                int move = calcMove(i);
                 Board newBoard = (Board)board.clone();
                 if (newBoard.addTile(move)) {
                     int[] res = minimax(newBoard, alpha, beta, depth - 1, turns);
@@ -91,11 +91,11 @@ public class AI {
         }
     }
 
-    private int calcMove(int i, Board board) {
+    private int calcMove(int i) {
         if (i % 2 == 0) {
-            return board.BOARD_WIDTH / 2 + i / 2;
+            return Board.BOARD_WIDTH / 2 + i / 2;
         } else {
-            return board.BOARD_WIDTH / 2 - (i + 1) / 2;
+            return Board.BOARD_WIDTH / 2 - (i + 1) / 2;
         }
     }
 }
